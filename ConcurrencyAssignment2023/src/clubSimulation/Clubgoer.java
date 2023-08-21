@@ -10,9 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 
 public class Clubgoer extends Thread {
-	
 	public static ClubGrid club; //shared club
-
 	GridBlock currentBlock;
 	private Random rand;
 	private int movingSpeed;
@@ -34,7 +32,6 @@ public class Clubgoer extends Thread {
 		wantToLeave=false;	 //want to stay when arrive
 		rand=new Random();
 	}
-	
 	//getter
 	public  boolean inRoom() {
 		return inRoom;
@@ -53,7 +50,17 @@ public class Clubgoer extends Thread {
 
 	//check to see if user pressed pause button
 	private void checkPause() {
-		// THIS DOES NOTHING - MUST BE FIXED  	
+		// THIS DOES NOTHING - MUST BE FIXED
+
+			synchronized(this)
+			{
+				try
+				{
+					while(club.pushPause.get())
+					this.wait();
+				}
+				catch(InterruptedException ex){}
+			}
         
     }
 	private void startSim() {
@@ -75,7 +82,7 @@ public class Clubgoer extends Thread {
 	public void enterClub() throws InterruptedException {
 		currentBlock = club.enterClub(myLocation);  //enter through entrance
 		inRoom=true;
-		System.out.println("Thread "+this.ID + " entered club at position: " + currentBlock.getX()  + " " +currentBlock.getY() );
+		//System.out.println("Thread "+this.ID + " entered club at position: " + currentBlock.getX()  + " " +currentBlock.getY() );
 		sleep(movingSpeed/2);  //wait a bit at door
 	}
 	
@@ -84,7 +91,7 @@ public class Clubgoer extends Thread {
 		int x_mv= rand.nextInt(3)-1;	//	-1,0 or 1
 		int y_mv= Integer.signum(club.getBar_y()-currentBlock.getY());//-1,0 or 1
 		currentBlock=club.move(currentBlock,x_mv,y_mv,myLocation); //head toward bar
-		System.out.println("Thread "+this.ID + " moved toward bar to position: " + currentBlock.getX()  + " " +currentBlock.getY() );
+		//System.out.println("Thread "+this.ID + " moved toward bar to position: " + currentBlock.getX()  + " " +currentBlock.getY() );
 		sleep(movingSpeed/2);  //wait a bit
 	}
 	
@@ -96,7 +103,7 @@ public class Clubgoer extends Thread {
 		int x_mv= Integer.signum(exit.getX()-currentBlock.getX());//x_mv is -1,0 or 1
 		int y_mv= Integer.signum(exit.getY()-currentBlock.getY());//-1,0 or 1
 		currentBlock=club.move(currentBlock,x_mv,y_mv,myLocation); 
-		System.out.println("Thread "+this.ID + " moved to towards exit: " + currentBlock.getX()  + " " +currentBlock.getY() );
+		//System.out.println("Thread "+this.ID + " moved to towards exit: " + currentBlock.getX()  + " " +currentBlock.getY() );
 		sleep(movingSpeed);  //wait a bit
 	}
 	
@@ -139,7 +146,7 @@ public class Clubgoer extends Thread {
 			sleep(movingSpeed*(rand.nextInt(100)+1)); //arriving takes a while
 			checkPause();
 			myLocation.setArrived();
-			System.out.println("Thread "+ this.ID + " arrived at club"); //output for checking
+			//System.out.println("Thread "+ this.ID + " arrived at club"); //output for checking
 			checkPause(); //check whether have been asked to pause
 			enterClub();
 		
@@ -159,7 +166,7 @@ public class Clubgoer extends Thread {
 						System.out.println("Thread "+this.ID + " left club");
 					}
 					else {
-						System.out.println("Thread "+this.ID + " going to exit" );
+						//System.out.println("Thread "+this.ID + " going to exit" );
 						headTowardsExit();
 					}				 
 				}
@@ -167,20 +174,20 @@ public class Clubgoer extends Thread {
 					sleep(movingSpeed/5);  //wait a bit		
 					if (currentBlock.isBar()) {
 						getDrink();
-						System.out.println("Thread "+this.ID + " got drink " );
+						//System.out.println("Thread "+this.ID + " got drink " );
 					}
 					else {
-						System.out.println("Thread "+this.ID + " going to getDrink " );
+						//System.out.println("Thread "+this.ID + " going to getDrink " );
 						headToBar();
 					}
 				}
 				else {
 					if (currentBlock.isDanceFloor()) {
 						dance();
-						System.out.println("Thread "+this.ID + " dancing " );
+						//System.out.println("Thread "+this.ID + " dancing " );
 					}
 				wander();
-				System.out.println("Thread "+this.ID + " wandering about " );
+				//System.out.println("Thread "+this.ID + " wandering about " );
 				}
 				
 			}

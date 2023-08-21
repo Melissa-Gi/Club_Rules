@@ -3,8 +3,11 @@
 
 package clubSimulation;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 //This class represents the club as a grid of GridBlocks
 public class ClubGrid {
+	public AtomicBoolean pushPause;
 	private GridBlock [][] Blocks;
 	private final int x;
 	private final int y;
@@ -28,8 +31,7 @@ public class ClubGrid {
 		entrance=Blocks[getMaxX()/2][0];
 		counter=c;
 		}
-	
-	//initialise the grsi, creating all the GridBlocks
+	//initialise the grid, creating all the GridBlocks
 	private  void initGrid(int []exitBlocks) throws InterruptedException {
 		for (int i=0;i<x;i++) {
 			for (int j=0;j<y;j++) {
@@ -70,13 +72,21 @@ public class ClubGrid {
 		return true;
 	}
 	
-	public GridBlock enterClub(PeopleLocation myLocation) throws InterruptedException  {
-		counter.personArrived(); //add to counter of people waiting 
-		entrance.get(myLocation.getID());
-		counter.personEntered(); //add to counter
-		myLocation.setLocation(entrance);
-		myLocation.setInRoom(true);
-		return entrance;
+	public GridBlock enterClub(PeopleLocation myLocation) throws InterruptedException  
+	{
+		synchronized(entrance)
+		{
+			while (counter.getInside() >= counter.getMax())
+			{
+				entrance.wait();
+			}
+			counter.personArrived(); //add to counter of people waiting 
+			entrance.get(myLocation.getID());
+			counter.personEntered(); //add to counter
+			myLocation.setLocation(entrance);
+			myLocation.setInRoom(true);
+			return entrance;
+		}
 	}
 	
 	
@@ -107,11 +117,14 @@ public class ClubGrid {
 	} 
 	
 
-	public  void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
+	public void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
 			currentBlock.release();
 			counter.personLeft(); //add to counter
 			myLocation.setInRoom(false);
-			entrance.notifyAll();
+			synchronized(entrance)
+			{
+				entrance.notifyAll();
+			}
 	}
 
 	public GridBlock getExit() {
