@@ -1,67 +1,62 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+[Club Rules: PCP Assignment 2](https://vula.uct.ac.za/access/content/attachment/e48d2390-2c06-46d6-8af5-fd3feae81ce8/Assignments/be189b5e-dfd6-4f87-b0ea-84560491ddc6/CSC2002S_PCP2_Assignment_2023.pdf)
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`
+This application was built for the purpose of submission to the University of Cape Town as part of the ciriculum. 
+<br>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
+>**The purpose of this project was to teach concurrency through debugging an existing program by carrying out correct synchronisation for thread management in this multithreaded program.** 
 
 
 ### Built With
 
-* []()
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+* Java
+* Make software, C
 
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
 To get a local copy up and running follow these simple example steps.
 
-### Prerequisites
+### Prerequisites and Installation
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
+A Java JDK is necessary to install as follows
+* Installing Java via terminal.
   ```sh
-  npm install npm@latest -g
+  sudo apt install oracle-java11-installer-local
   ```
+  To install a specific version, replace 11 with your desired version, although recent versions are preffered.
+* Unix system to compile and run the program. 
 
-### Installation
-
-1. Get a free API Key at [https://example.com](https://example.com)
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+1. On your unix system run make to compile and start the simulation.
+2. The application runs the ClubSimulation class which shows the display immediately.
+3. The application can be run repeatedly.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+**Usage examples**: To act as a basis for a game envirnment
 
 
 
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
+- *Start button*: used  to begin the flow of the numbered patrons into the club. 
+- *Pause button*: Used to control the liveness of the 
+- *Quit button*: Used to terminate the application
+- *Waiting Tally*: Used to indicate how many clubgoers are waiting to be admitted into the club grid at any given time. This number should change often.
+- *The grid*: A fixed number of blocks with a scaled region for dance floor and bar area
+- *Patrons*: Numbered dots act as the clubgoers which move around to simulate human behaviour.
 
-See the [open issues](https://github.com/github_username/repo_name/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* []()
-* []()
-* []()
+* Professor Michelle Kuttel
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<p align="right">(<a href="#About-The-Project">back to top</a>)</p>
