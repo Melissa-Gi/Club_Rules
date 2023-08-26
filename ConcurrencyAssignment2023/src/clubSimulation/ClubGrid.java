@@ -3,11 +3,11 @@
 
 package clubSimulation;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 //This class represents the club as a grid of GridBlocks
 public class ClubGrid {
-	public AtomicBoolean pushPause;
 	private GridBlock [][] Blocks;
 	private final int x;
 	private final int y;
@@ -19,6 +19,8 @@ public class ClubGrid {
 	private final static int minY =5;//minimum y dimension
 	
 	private PeopleCounter counter;
+	public static AtomicBoolean pushPause;
+	public static CountDownLatch latch;
 	
 	ClubGrid(int x, int y, int [] exitBlocks,PeopleCounter c) throws InterruptedException {
 		if (x<minX) x=minX; //minimum x
@@ -60,6 +62,11 @@ public class ClubGrid {
 		return entrance;
 	}
 
+	public boolean overCapacity()
+	{
+		return counter.overCapacity();
+	}
+
 	public  boolean inGrid(int i, int j) {
 		if ((i>=x) || (j>=y) ||(i<0) || (j<0)) 
 			return false;
@@ -74,13 +81,13 @@ public class ClubGrid {
 	
 	public GridBlock enterClub(PeopleLocation myLocation) throws InterruptedException  
 	{
+		counter.personArrived(); //add to counter of people waiting 
 		synchronized(entrance)
 		{
-			while (counter.getInside() >= counter.getMax())
+			while (counter.overCapacity())
 			{
 				entrance.wait();
 			}
-			counter.personArrived(); //add to counter of people waiting 
 			entrance.get(myLocation.getID());
 			counter.personEntered(); //add to counter
 			myLocation.setLocation(entrance);
@@ -117,7 +124,7 @@ public class ClubGrid {
 	} 
 	
 
-	public void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
+	synchronized void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
 			currentBlock.release();
 			counter.personLeft(); //add to counter
 			myLocation.setInRoom(false);

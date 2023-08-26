@@ -21,7 +21,6 @@ public class Clubgoer extends Thread {
 	private boolean wantToLeave;
 	
 	private int ID; //thread ID 
-
 	
 	Clubgoer( int ID,  PeopleLocation loc,  int speed) {
 		this.ID=ID;
@@ -51,20 +50,28 @@ public class Clubgoer extends Thread {
 	//check to see if user pressed pause button
 	private void checkPause() {
 		// THIS DOES NOTHING - MUST BE FIXED
-
-			synchronized(this)
+		synchronized(ClubGrid.pushPause)
+		{
+			if(this.inRoom() || !club.overCapacity())
 			{
 				try
 				{
-					while(club.pushPause.get())
-					this.wait();
+					while(ClubGrid.pushPause.get())
+					{
+						ClubGrid.pushPause.wait();
+					}
 				}
 				catch(InterruptedException ex){}
 			}
-        
+		}   
     }
 	private void startSim() {
-		// THIS DOES NOTHING - MUST BE FIXED  	
+		try {
+			ClubGrid.latch.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
     }
 	
@@ -103,7 +110,7 @@ public class Clubgoer extends Thread {
 		int x_mv= Integer.signum(exit.getX()-currentBlock.getX());//x_mv is -1,0 or 1
 		int y_mv= Integer.signum(exit.getY()-currentBlock.getY());//-1,0 or 1
 		currentBlock=club.move(currentBlock,x_mv,y_mv,myLocation); 
-		//System.out.println("Thread "+this.ID + " moved to towards exit: " + currentBlock.getX()  + " " +currentBlock.getY() );
+		System.out.println("Thread "+this.ID + " moved to towards exit: " + currentBlock.getX()  + " " +currentBlock.getY() );
 		sleep(movingSpeed);  //wait a bit
 	}
 	
@@ -146,7 +153,7 @@ public class Clubgoer extends Thread {
 			sleep(movingSpeed*(rand.nextInt(100)+1)); //arriving takes a while
 			checkPause();
 			myLocation.setArrived();
-			//System.out.println("Thread "+ this.ID + " arrived at club"); //output for checking
+			System.out.println("Thread "+ this.ID + " arrived at club"); //output for checking
 			checkPause(); //check whether have been asked to pause
 			enterClub();
 		
@@ -166,7 +173,7 @@ public class Clubgoer extends Thread {
 						System.out.println("Thread "+this.ID + " left club");
 					}
 					else {
-						//System.out.println("Thread "+this.ID + " going to exit" );
+						System.out.println("Thread "+this.ID + " going to exit" );
 						headTowardsExit();
 					}				 
 				}
@@ -174,20 +181,20 @@ public class Clubgoer extends Thread {
 					sleep(movingSpeed/5);  //wait a bit		
 					if (currentBlock.isBar()) {
 						getDrink();
-						//System.out.println("Thread "+this.ID + " got drink " );
+						System.out.println("Thread "+this.ID + " got drink " );
 					}
 					else {
-						//System.out.println("Thread "+this.ID + " going to getDrink " );
+						System.out.println("Thread "+this.ID + " going to getDrink " );
 						headToBar();
 					}
 				}
 				else {
 					if (currentBlock.isDanceFloor()) {
 						dance();
-						//System.out.println("Thread "+this.ID + " dancing " );
+						System.out.println("Thread "+this.ID + " dancing " );
 					}
 				wander();
-				//System.out.println("Thread "+this.ID + " wandering about " );
+				System.out.println("Thread "+this.ID + " wandering about " );
 				}
 				
 			}

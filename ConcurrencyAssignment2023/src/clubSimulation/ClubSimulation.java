@@ -19,10 +19,10 @@ public class ClubSimulation {
 	static int yLimit=400;
 	static int gridX=10; //number of x grids in club - default value if not provided on command line
 	static int gridY=10; //number of y grids in club - default value if not provided on command line
-	static int max=3; //max number of customers - default value if not provided on command line
+	static int max=10; //max number of customers - default value if not provided on command line
 	static int live = 0;
 	
-	static Clubgoer[] patrons; // array for customer threads
+	static Object[] patrons; // array for customer threads
 	static PeopleLocation [] peopleLocations;  //array to keep track of where customers are
 	
 	static PeopleCounter tallys; //counters for number of people inside and outside club
@@ -32,7 +32,8 @@ public class ClubSimulation {
 	static CounterDisplay counterDisplay ; //threaded display of counters
 	
 	private static int maxWait=1200; //for the slowest customer
-	private static int minWait=500; //for the fastest cutomer
+	private static int minWait=500; //for the fastest cutomer 
+
 
 	public static void setupGUI(int frameX,int frameY,int [] exits) {
 		// Frame initialize and dimensions
@@ -71,12 +72,9 @@ public class ClubSimulation {
 		startB.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e)  {
 			    	  	// THIS DOES NOTHING - MUST BE FIXED
-			 
-			for (int i=0;i<noClubgoers;i++) 
-			{
-				patrons[i].start();
-			} 	  
+				ClubGrid.latch.countDown();
 		    }
+
 		   });
 			
 			final JButton pauseB = new JButton("Pause ");;
@@ -84,20 +82,19 @@ public class ClubSimulation {
 			// add the listener to the jbutton to handle the "pressed" event
 			pauseB.addActionListener(new ActionListener() {
 		      public void actionPerformed(ActionEvent e) {
-					if (clubGrid.pushPause.get() == false)
+				synchronized(ClubGrid.pushPause)
+				{
+					if (!ClubGrid.pushPause.get())
 					{
-						System.out.println("We're in here");
-						clubGrid.pushPause.set(true);
+						ClubGrid.pushPause.set(true);
 					}
 					else
-					{
-						System.out.println("This is pressed");
-						synchronized(clubGrid.pushPause)
-						{
-							clubGrid.pushPause.set(false);
-							clubGrid.pushPause.notifyAll();
-						}
+					{						
+							ClubGrid.pushPause.set(false);
+							ClubGrid.pushPause.notifyAll();
 					}
+				}
+			  
 		      }
 		    });
 			
@@ -124,7 +121,9 @@ public class ClubSimulation {
 	
 
 	public static void main(String[] args) throws InterruptedException {
-		
+		ClubGrid.latch = new CountDownLatch(1);
+		ClubGrid.pushPause = new AtomicBoolean(false);
+
 		//deal with command line arguments if provided
 		if (args.length==4) {
 			noClubgoers=Integer.parseInt(args[0]);  //total people to enter room
@@ -141,7 +140,7 @@ public class ClubSimulation {
 		Clubgoer.club = clubGrid; //grid shared with class
 	   
 	    peopleLocations = new PeopleLocation[noClubgoers];
-		patrons = new Clubgoer[noClubgoers];
+		patrons = new Object[noClubgoers];
 		
 		Random rand = new Random();
 
@@ -152,7 +151,6 @@ public class ClubSimulation {
     		}
 		           
 		setupGUI(frameX, frameY,exit);  //Start Panel thread - for drawing animation
-		clubGrid.pushPause = new AtomicBoolean(false);
         //start all the threads
 		Thread t = new Thread(clubView); 
       	t.start();
@@ -160,7 +158,10 @@ public class ClubSimulation {
       	Thread s = new Thread(counterDisplay);  
       	s.start();
 
-		
+		for (int i=0;i<noClubgoers;i++) 
+		{
+			((Thread) patrons[i]).start();
+		} 	 
  	}
 
 }
